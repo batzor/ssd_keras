@@ -21,7 +21,7 @@ from __future__ import division
 import numpy as np
 import tensorflow as tf
 import keras.backend as K
-from tensorflow.keras.engine.topology import InputSpec, Layer
+from tensorflow.keras.layers import Layer, InputSpec
 
 class DecodeDetections(Layer):
     '''

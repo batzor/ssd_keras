@@ -19,7 +19,7 @@ limitations under the License.
 from __future__ import division
 import numpy as np
 import keras.backend as K
-from tensorflow.keras.engine.topology import InputSpec, Layer
+from keras.layers import Layer, InputSpec
 
 class L2Normalization(Layer):
     '''
@@ -43,7 +43,7 @@ class L2Normalization(Layer):
     '''
 
     def __init__(self, gamma_init=20, **kwargs):
-        if K.image_dim_ordering() == 'tf':
+        if K.image_data_format() == 'channels_last':
             self.axis = 3
         else:
             self.axis = 1

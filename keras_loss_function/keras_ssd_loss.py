@@ -18,7 +18,8 @@ limitations under the License.
 
 from __future__ import division
 import tensorflow as tf
-
+tf.to_float = lambda x: tf.cast(x, tf.float32)
+tf.to_int32 = lambda x: tf.cast(x, tf.int32)
 class SSDLoss:
     '''
     The SSD loss, see https://arxiv.org/abs/1512.02325.
@@ -92,7 +93,7 @@ class SSDLoss:
         # Make sure that `y_pred` doesn't contain any zeros (which would break the log function)
         y_pred = tf.maximum(y_pred, 1e-15)
         # Compute the log loss
-        log_loss = -tf.reduce_sum(y_true * tf.log(y_pred), axis=-1)
+        log_loss = -tf.reduce_sum(y_true * tf.math.log(y_pred), axis=-1)
         return log_loss
 
     def compute_loss(self, y_true, y_pred):
@@ -121,9 +122,6 @@ class SSDLoss:
         Returns:
             A scalar, the total multitask loss for classification and localization.
         '''
-        self.neg_pos_ratio = tf.constant(self.neg_pos_ratio)
-        self.n_neg_min = tf.constant(self.n_neg_min)
-        self.alpha = tf.constant(self.alpha)
 
         batch_size = tf.shape(y_pred)[0] # Output dtype: tf.int32
         n_boxes = tf.shape(y_pred)[1] # Output dtype: tf.int32, note that `n_boxes` in this context denotes the total number of boxes per image, not the number of boxes per cell.
@@ -151,7 +149,7 @@ class SSDLoss:
 
         # First, compute the classification loss for all negative boxes.
         neg_class_loss_all = classification_loss * negatives # Tensor of shape (batch_size, n_boxes)
-        n_neg_losses = tf.count_nonzero(neg_class_loss_all, dtype=tf.int32) # The number of non-zero loss entries in `neg_class_loss_all`
+        n_neg_losses = tf.math.count_nonzero(neg_class_loss_all, dtype=tf.int32) # The number of non-zero loss entries in `neg_class_loss_all`
         # What's the point of `n_neg_losses`? For the next step, which will be to compute which negative boxes enter the classification
         # loss, we don't just want to know how many negative ground truth boxes there are, but for how many of those there actually is
         # a positive (i.e. non-zero) loss. This is necessary because `tf.nn.top-k()` in the function below will pick the top k boxes with
